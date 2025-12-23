@@ -1,9 +1,13 @@
 import express from "express";
+import cors from "cors";
 import yts from "yt-search";
 import ytdl from "ytdl-core";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Enable CORS for all origins (including Chrome extension)
+app.use(cors());
 
 app.get("/search", async (req, res) => {
   const query = req.query.q;
@@ -30,11 +34,15 @@ app.get("/audio", async (req, res) => {
   try {
     const url = `https://www.youtube.com/watch?v=${videoId}`;
     const info = await ytdl.getInfo(url);
-    const format = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' });
+    const format = ytdl.chooseFormat(info.formats, { quality: "highestaudio" });
     res.json({ audioUrl: format.url });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get("/", (req, res) => {
+  res.send("YouTube Audio Proxy is running!");
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
